@@ -29,7 +29,7 @@ class RecordTests {
   import testutil._
 
   // making it method local causes weird compile error in Scala 2.10
-  import ops.record.{ RemoveAll, UnzipFields }
+  import ops.record.{ RemoveAll, UnzipFields, Selector }
 
   object intField1 extends FieldOf[Int]
   object intField2 extends FieldOf[Int]
@@ -1095,5 +1095,19 @@ class RecordTests {
     val fields: (FieldType[Int, x.T] :: FieldType[String, y.T] :: FieldType[Boolean, z.T] :: HNil) = SwapRecord[TestRecord].apply
 
     assertEquals(fields.toList, List('x, 'y, 'z))
+  }
+
+  @Test
+  def testSelectorTagged {
+    import shapeless.syntax._
+    import shapeless.tag
+    import shapeless.tag._
+
+    trait TestTag
+    case class FooT(bar: String @@ TestTag)
+    val lgt = LabelledGeneric[FooT]
+    val fooT = FooT(tag[TestTag]("test"))
+
+    assertEquals(tag[TestTag]("test"), lgt.to(fooT).get('bar))
   }
 }
